@@ -18,7 +18,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install requests beautifulsoup4 python-dateutil
+        run: pip install requests beautifulsoup4 python-dateutil lxml
 
       - name: Fetch news
         run: python scripts/fetch_news.py
