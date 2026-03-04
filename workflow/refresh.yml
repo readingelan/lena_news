@@ -1,1 +1,48 @@
+name: Refresh dashboard data
 
+on:
+  schedule:
+    - cron: "5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install requests beautifulsoup4 python-dateutil
+
+      - name: Fetch news
+        run: python scripts/fetch_news.py
+
+      - name: Fetch YouTube (channel)
+        run: python scripts/fetch_youtube_channel.py
+
+      - name: Fetch YouTube (search)
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+        run: python scripts/fetch_youtube_search.py
+
+      - name: Stamp updated time (KST)
+        run: |
+          python - << 'PY'
+          import json, datetime
+          now = datetime.datetime.utcnow() + datetime.timedelta(hours=9)
+          with open("data/updated.json","w",encoding="utf-8") as f:
+              json.dump({"updated_kst": now.strftime("%Y-%m-%d %H:%M")}, f, ensure_ascii=False, indent=2)
+          PY
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add data/*.json
+          git diff --cached --quiet || (git commit -m "chore: refresh data" && git push)
