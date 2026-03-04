@@ -20,16 +20,74 @@ function el(tag, attrs = {}, ...children) {
   return node;
 }
 
+/* ---------- NEWS (NAVER/GOOGLE) ---------- */
+let newsNaver = [];
+let newsGoogle = [];
+let currentSource = "naver";
+
 function renderNews(items) {
   const ul = document.getElementById("news-list");
   ul.innerHTML = "";
   items.slice(0, 20).forEach(n => {
     const a = el("a", { href:n.link, target:"_blank", rel:"noreferrer" }, n.title);
-    const meta = el("div", { class:"muted" }, `${n.source || ""}${n.published ? " · " + n.published : ""}`);
+    const meta = el("div", { class:"muted" },
+      `${n.source || ""}${n.published_kst ? " · " + n.published_kst : ""}`
+    );
     ul.appendChild(el("li", {}, a, meta));
   });
 }
 
+function parseDateSafe(iso) {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function sortByNewest(items) {
+  return [...items].sort((a,b) => {
+    const da = parseDateSafe(a.published_iso);
+    const db = parseDateSafe(b.published_iso);
+    const ta = da ? da.getTime() : 0;
+    const tb = db ? db.getTime() : 0;
+    return tb - ta;
+  });
+}
+
+function filterLast7Days(items) {
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  return items.filter(it => {
+    const d = parseDateSafe(it.published_iso);
+    if (!d) return false;
+    return d >= cutoff;
+  });
+}
+
+function getActiveNewsList() {
+  const srcList = (currentSource === "naver") ? newsNaver : newsGoogle;
+  const weekOnly = document.getElementById("chk-week")?.checked;
+
+  let out = sortByNewest(srcList);
+  if (weekOnly) out = filterLast7Days(out);
+
+  return out.slice(0, 20);
+}
+
+function setNewsSource(src){
+  currentSource = src;
+
+  const btnN = document.getElementById("btn-naver");
+  const btnG = document.getElementById("btn-google");
+
+  const isN = src === "naver";
+  btnN.classList.toggle("active", isN);
+  btnG.classList.toggle("active", !isN);
+  btnN.setAttribute("aria-pressed", String(isN));
+  btnG.setAttribute("aria-pressed", String(!isN));
+
+  renderNews(getActiveNewsList());
+}
+
+/* ---------- YOUTUBE ---------- */
 function renderYt(items, mountId, limit=10) {
   const wrap = document.getElementById(mountId);
   wrap.innerHTML = "";
@@ -49,9 +107,19 @@ async function refreshData() {
   document.getElementById("updated").textContent =
     updated?.updated_kst ? `마지막 갱신(KST): ${updated.updated_kst}` : "";
 
-  const news = await loadJson("./data/news.json") || [];
-  renderNews(news);
+  // 뉴스(네이버/구글 분리)
+  newsNaver = await loadJson("./data/naver_news.json") || [];
+  newsGoogle = await loadJson("./data/google_news.json") || [];
 
+  // 버튼/체크박스 이벤트
+  document.getElementById("btn-naver").onclick = () => setNewsSource("naver");
+  document.getElementById("btn-google").onclick = () => setNewsSource("google");
+  document.getElementById("chk-week").onchange = () => renderNews(getActiveNewsList());
+
+  // 기본값: 네이버
+  setNewsSource("naver");
+
+  // 유튜브
   const ytChannel = await loadJson("./data/youtube_channel.json") || [];
   renderYt(ytChannel, "yt-channel", 10);
 
