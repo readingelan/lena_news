@@ -13,15 +13,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install requests beautifulsoup4 python-dateutil lxml
+        run: pip install requests beautifulsoup4 python-dateutil lxml readability-lxml
 
-      - name: Fetch news
-        run: python scripts/fetch_news.py
+      - name: Fetch Google news (body filter)
+        run: python scripts/fetch_google_news.py
+
+      - name: Fetch Naver news (body filter)
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: python scripts/fetch_naver_news.py
 
       - name: Fetch YouTube (channel)
         run: python scripts/fetch_youtube_channel.py
