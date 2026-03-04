@@ -21,13 +21,37 @@
   </header>
 
   <main class="wrap">
+    <!-- NEWS -->
     <section id="view-news" class="view">
-      <h2>📰 최근 뉴스 (박정현 + 가수) · Top 20</h2>
+      <div class="news-head">
+        <h2>📰 최근 뉴스 (본문 기준: “박정현” + “가수”) · Top 20</h2>
+
+        <div class="news-controls">
+          <label class="week-only">
+            <input type="checkbox" id="chk-week" />
+            일주일 이내 기사만
+          </label>
+
+          <div class="source-toggle" role="tablist" aria-label="News source">
+            <button id="btn-naver" class="source-btn active" type="button" aria-pressed="true" title="Naver">
+              <span class="icon n">N</span>
+              <span class="label">네이버</span>
+            </button>
+
+            <button id="btn-google" class="source-btn" type="button" aria-pressed="false" title="Google">
+              <span class="icon g">G</span>
+              <span class="label">구글</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <ul id="news-list"></ul>
     </section>
 
+    <!-- YOUTUBE -->
     <section id="view-youtube" class="view">
-      <h2>▶️ 유튜브 · 각 Top 10</h2>
+      <h2>▶️ 유튜브 </h2>
 
       <div class="two-col">
         <div class="card">
@@ -35,6 +59,30 @@
           <div id="yt-channel" class="yt-grid"></div>
         </div>
 
+        <div class="card">
+          <h3>검색어: 박정현</h3>
+          <div id="yt-search" class="yt-grid"></div>
+          <p class="muted" id="yt-search-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTAGRAM -->
+    <section id="view-instagram" class="view">
+      <h2>📷 인스타그램 (임베드)</h2>
+      <p class="muted">인스타는 임베드로 표시합니다.</p>
+
+      <div class="ig">
+        <!-- 여기에 인스타 embed 코드 붙여넣기 -->
+      </div>
+
+      <script async src="https://www.instagram.com/embed.js"></script>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
         <div class="card">
           <h3>검색어: 박정현</h3>
           <div id="yt-search" class="yt-grid"></div>
