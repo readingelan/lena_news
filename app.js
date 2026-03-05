@@ -62,12 +62,44 @@ function filterLast7Days(items) {
   });
 }
 
+/** 제목 정규화: 괄호/따옴표/특수문자/여분 공백 제거해서 "유사 제목"도 중복으로 잡기 */
+function normalizeTitle(t) {
+  return (t || "")
+    .toLowerCase()
+    .replace(/\[[^\]]*\]/g, " ")   // [단독] 같은 태그 제거
+    .replace(/\([^\)]*\)/g, " ")   // (종합) 같은 태그 제거
+    .replace(/[“”"']/g, " ")
+    .replace(/[\.\,\!\?\:\;\-\—\|\·]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** 동일 제목(정규화 기준) 중복 제거: 최신 것만 남기기 위해 정렬 후 앞에서부터 유지 */
+function dedupeByTitle(items) {
+  const seen = new Set();
+  const out = [];
+  for (const it of items) {
+    const key = normalizeTitle(it.title);
+    if (!key) continue;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(it);
+  }
+  return out;
+}
+
 function getActiveNewsList() {
   const srcList = (currentSource === "naver") ? newsNaver : newsGoogle;
   const weekOnly = document.getElementById("chk-week")?.checked;
 
+  // 1) 최신순 정렬
   let out = sortByNewest(srcList);
+
+  // 2) 7일 필터
   if (weekOnly) out = filterLast7Days(out);
+
+  // 3) 동일 제목 1개만(정규화)
+  out = dedupeByTitle(out);
 
   return out.slice(0, 20);
 }
