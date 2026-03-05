@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>키워드 모니터링</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>키워드 모니터링</h1>
+
+    <div class="controls">
+      <label class="chk">
+        <input type="checkbox" id="only7" />
+        일주일 이내만
+      </label>
+      <label class="chk">
+        <input type="checkbox" id="dedupeTitle" checked />
+        동일 제목 1개만
+      </label>
+      <button id="refreshBtn">새로고침</button>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab active" data-platform="naver"><span class="icon">N</span><span>네이버 뉴스</span></button>
+      <button class="tab" data-platform="google"><span class="icon">G</span><span>구글 웹검색</span></button>
+      <button class="tab" data-platform="youtube"><span class="icon">Y</span><span>유튜브</span></button>
+      <button class="tab" data-platform="instagram"><span class="icon">I</span><span>인스타그램</span></button>
+    </nav>
+  </header>
+
+  <main class="main">
+    <div id="status" class="status"></div>
+    <ul id="list" class="list"></ul>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
